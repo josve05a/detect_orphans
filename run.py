@@ -117,4 +117,29 @@ else:
         if source_page:
             print("Error: 'Nanhai_Chao' is linked from the article:", source_page)
         else:
-            print("Error: '
+            print("Error: 'Nanhai_Chao' could not be identified as an orphan for an unknown reason.")
+
+    # Exit the script
+    exit()
+
+# Check if the dump file already exists; if not, download it with a progress bar
+if not os.path.exists(dump_file_path):
+    print("Downloading the Wikipedia dump file...")
+
+    # Get the file size for the progress bar
+    response = requests.get(dump_url, stream=True)
+    file_size = int(response.headers.get('content-length', 0))
+
+    # Initialize tqdm for the progress bar
+    with open(dump_file_path, 'wb') as dump_file:
+        with tqdm(total=file_size, unit='B', unit_scale=True, unit_divisor=1024) as pbar:
+            for data in response.iter_content(chunk_size=1024):
+                dump_file.write(data)
+                pbar.update(len(data))
+
+    print("Download complete.")
+
+# Process the dump file and collect orphaned articles
+print("Collecting orphaned articles...")
+collect_orphaned_articles(dump_file_path, output_file_path)
+print("Collection complete. Orphaned articles are saved in 'orphaned_articles_list.txt'.")
