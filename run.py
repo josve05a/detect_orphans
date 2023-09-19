@@ -4,6 +4,7 @@ import bz2
 import os
 from tqdm import tqdm
 import time
+import threading  # Import the threading module
 
 # Define the URL of the Wikipedia dump file
 dump_url = "https://dumps.wikimedia.org/enwiki/20230901/enwiki-20230901-pages-articles.xml.bz2"
@@ -45,11 +46,6 @@ def is_orphaned(title, dump_file_path, total_lines):
                     if title == article_title and not is_redirect and title not in redirect_titles:
                         return True
 
-            # Update the progress for line counting
-            if line_count % 10000 == 0:
-                progress = line_count / total_lines * 100
-                print(f"Counting lines: {line_count}/{total_lines} ({progress:.2f}%)")
-
     return False
 
 # Define a function to efficiently count the total number of lines in the dump file
@@ -69,6 +65,28 @@ def count_total_lines_efficiently(dump_file_path):
 
     return total_lines
 
+# Define a function to continuously print line counting progress
+def print_line_count_progress(total_lines):
+    while True:
+        line_count = total_lines.value  # Access the shared variable
+        progress = line_count / total_lines.total * 100
+        print(f"Counting lines: {line_count}/{total_lines.total} ({progress:.2f}%)")
+        time.sleep(10)  # Sleep for 10 seconds
+
+# Define a shared variable for line counting progress
+class TotalLines:
+    def __init__(self):
+        self.total = 0
+        self.value = 0
+
+# Create an instance of the shared variable
+total_lines = TotalLines()
+
+# Create a thread to continuously print line counting progress
+progress_thread = threading.Thread(target=print_line_count_progress, args=(total_lines,))
+progress_thread.daemon = True  # Set the thread as a daemon so it exits when the script exits
+progress_thread.start()  # Start the progress thread
+
 # Define the paths for the dump file and output file
 dump_file_path = "enwiki-20230901-pages-articles.xml.bz2"
 output_file_path = "orphaned_articles_list.txt"
@@ -76,17 +94,8 @@ output_file_path = "orphaned_articles_list.txt"
 print("Starting the script...")  # Added starting message
 
 # Count the total number of lines in the dump file efficiently
-total_lines = count_total_lines_efficiently(dump_file_path)
-print(f"Total lines in the dump file: {total_lines}")
-
-# Print line counting progress every 10 seconds
-start_time = time.time()
-while time.time() - start_time < 10:
-    time.sleep(1)  # Sleep for 1 second
-
-    # Update the progress for line counting
-    progress = line_count / total_lines * 100
-    print(f"Counting lines: {line_count}/{total_lines} ({progress:.2f}%)")
+total_lines.total = count_total_lines_efficiently(dump_file_path)
+print(f"Total lines in the dump file: {total_lines.total}")
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 print("Testing if 'Nanhai_Chao' is orphaned...")
