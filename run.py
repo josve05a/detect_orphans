@@ -51,10 +51,22 @@ def is_orphaned(title, dump_file_path, total_lines):
 
     return False
 
-# Define a function to count the total number of lines in the dump file
-def count_total_lines(dump_file_path):
+# Define a function to efficiently count the total number of lines in the dump file
+def count_total_lines_efficiently(dump_file_path):
+    # Count lines more efficiently by searching for specific markers
+    total_lines = 0
+
     with bz2.open(dump_file_path, 'rt', encoding='utf-8') as dump_file:
-        return sum(1 for _ in dump_file)
+        while True:
+            line = dump_file.readline()
+            if not line:
+                break
+
+            # Check for markers indicating the start of an article
+            if line.startswith('<page>'):
+                total_lines += 1
+
+    return total_lines
 
 # Define the paths for the dump file and output file
 dump_file_path = "enwiki-20230901-pages-articles.xml.bz2"
@@ -62,8 +74,8 @@ output_file_path = "orphaned_articles_list.txt"
 
 print("Starting the script...")  # Added starting message
 
-# Count the total number of lines in the dump file
-total_lines = count_total_lines(dump_file_path)
+# Count the total number of lines in the dump file efficiently
+total_lines = count_total_lines_efficiently(dump_file_path)
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 print("Testing if 'Nanhai_Chao' is orphaned...")
