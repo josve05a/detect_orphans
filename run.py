@@ -3,8 +3,8 @@ import mwparserfromhell
 import bz2
 import os
 from tqdm import tqdm
+import threading
 import time
-import threading  # Import the threading module
 
 # Define the URL of the Wikipedia dump file
 dump_url = "https://dumps.wikimedia.org/enwiki/20230901/enwiki-20230901-pages-articles.xml.bz2"
@@ -89,6 +89,9 @@ total_lines = TotalLines()
 progress_thread = threading.Thread(target=print_line_count_progress, args=(total_lines,))
 progress_thread.daemon = True  # Set the thread as a daemon so it exits when the script exits
 
+# Start the progress thread
+progress_thread.start()
+
 # Define the paths for the dump file and output file
 dump_file_path = "enwiki-20230901-pages-articles.xml.bz2"
 output_file_path = "orphaned_articles_list.txt"
@@ -98,9 +101,6 @@ print("Starting the script...")  # Added starting message
 # Count the total number of lines in the dump file efficiently
 total_lines.total = count_total_lines_efficiently(dump_file_path)
 print(f"Total lines in the dump file: {total_lines.total}")
-
-# Start the progress thread after total_lines.total is set
-progress_thread.start()  # Start the progress thread
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 print("Testing if 'Nanhai_Chao' is orphaned...")
