@@ -82,8 +82,16 @@ if not os.path.exists(dump_file_path):
     response = requests.get(dump_url, stream=True)
 
     with open(dump_file_path, 'wb') as dump_file:
+        total_size = int(response.headers.get('content-length', 0))
+        downloaded_size = 0
+
         for data in response.iter_content(chunk_size=1024):
+            downloaded_size += len(data)
             dump_file.write(data)
+
+            # Calculate download progress
+            progress_percentage = (downloaded_size / total_size) * 100
+            print(f"Download progress: {progress_percentage:.2f}%")
 
     print("Download complete.")
 
