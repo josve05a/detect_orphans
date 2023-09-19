@@ -12,13 +12,13 @@ def is_in_main_namespace(title):
     return not title.startswith("Wikipedia:") and not title.startswith("File:")
 
 # Define a function to check if an article is orphaned
-def is_orphaned(title, dump_file_path):
+def is_orphaned(title, dump_file_path, total_lines):
     # Store redirect titles
     redirect_titles = set()
 
     # Open the dump file for reading
     with bz2.open(dump_file_path, 'rt', encoding='utf-8') as dump_file:
-        for line in dump_file:
+        for line_count, line in enumerate(dump_file, start=1):
             # Check if the line represents an article
             if line.startswith('<page>'):
                 # Parse the page content using mwparserfromhell
@@ -44,43 +44,30 @@ def is_orphaned(title, dump_file_path):
                     if title == article_title and not is_redirect and title not in redirect_titles:
                         return True
 
+            # Update the progress bar
+            if line_count % 10000 == 0:
+                progress = line_count / total_lines * 100
+                print(f"Progress: {progress:.2f}%")
+
     return False
 
-# Define a function to find the source of inbound links to the test page
-def find_inbound_link_source(title, dump_file_path):
-    # Open the dump file for reading
+# Define a function to count the total number of lines in the dump file
+def count_total_lines(dump_file_path):
     with bz2.open(dump_file_path, 'rt', encoding='utf-8') as dump_file:
-        source_page = None
-        for line in dump_file:
-            # Check if the line represents an article
-            if line.startswith('<page>'):
-                # Parse the page content using mwparserfromhell
-                page = mwparserfromhell.parse(line)
-                # Extract the title of the article
-                article_title = page.filter_headings()[0].title.strip()
-
-                # Check if the article is in the main namespace
-                if is_in_main_namespace(article_title):
-                    # Find all links in the article
-                    links = page.filter_wikilinks()
-                    
-                    # Check if the test page is linked from this article
-                    for link in links:
-                        if link.title == title:
-                            source_page = article_title
-                            break
-
-                    if source_page:
-                        break
-
-    return source_page
+        return sum(1 for _ in dump_file)
 
 # Define the paths for the dump file and output file
 dump_file_path = "enwiki-20230901-pages-articles.xml.bz2"
 output_file_path = "orphaned_articles_list.txt"
 
+print("Starting the script...")  # Added starting message
+
+# Count the total number of lines in the dump file
+total_lines = count_total_lines(dump_file_path)
+
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
-if is_orphaned("Nanhai_Chao", dump_file_path):
+print("Testing if 'Nanhai_Chao' is orphaned...")
+if is_orphaned("Nanhai_Chao", dump_file_path, total_lines):
     print("'Nanhai_Chao' is identified as an orphan.")
 else:
     # Check if "Nanhai_Chao" is not found in the dump
