@@ -3,6 +3,7 @@ import mwparserfromhell
 import bz2
 import os
 from tqdm import tqdm
+import time
 
 # Define the URL of the Wikipedia dump file
 dump_url = "https://dumps.wikimedia.org/enwiki/20230901/enwiki-20230901-pages-articles.xml.bz2"
@@ -77,6 +78,15 @@ print("Starting the script...")  # Added starting message
 # Count the total number of lines in the dump file efficiently
 total_lines = count_total_lines_efficiently(dump_file_path)
 print(f"Total lines in the dump file: {total_lines}")
+
+# Print line counting progress every 10 seconds
+start_time = time.time()
+while time.time() - start_time < 10:
+    time.sleep(1)  # Sleep for 1 second
+
+    # Update the progress for line counting
+    progress = line_count / total_lines * 100
+    print(f"Counting lines: {line_count}/{total_lines} ({progress:.2f}%)")
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 print("Testing if 'Nanhai_Chao' is orphaned...")
