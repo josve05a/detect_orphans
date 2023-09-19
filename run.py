@@ -69,7 +69,10 @@ def count_total_lines_efficiently(dump_file_path):
 def print_line_count_progress(total_lines):
     while True:
         line_count = total_lines.value  # Access the shared variable
-        progress = line_count / total_lines.total * 100
+        if total_lines.total == 0:
+            progress = 0.0  # Avoid division by zero
+        else:
+            progress = line_count / total_lines.total * 100
         print(f"Counting lines: {line_count}/{total_lines.total} ({progress:.2f}%)")
         time.sleep(10)  # Sleep for 10 seconds
 
@@ -85,7 +88,6 @@ total_lines = TotalLines()
 # Create a thread to continuously print line counting progress
 progress_thread = threading.Thread(target=print_line_count_progress, args=(total_lines,))
 progress_thread.daemon = True  # Set the thread as a daemon so it exits when the script exits
-progress_thread.start()  # Start the progress thread
 
 # Define the paths for the dump file and output file
 dump_file_path = "enwiki-20230901-pages-articles.xml.bz2"
@@ -96,6 +98,9 @@ print("Starting the script...")  # Added starting message
 # Count the total number of lines in the dump file efficiently
 total_lines.total = count_total_lines_efficiently(dump_file_path)
 print(f"Total lines in the dump file: {total_lines.total}")
+
+# Start the progress thread after total_lines.total is set
+progress_thread.start()  # Start the progress thread
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 print("Testing if 'Nanhai_Chao' is orphaned...")
@@ -112,29 +117,4 @@ else:
         if source_page:
             print("Error: 'Nanhai_Chao' is linked from the article:", source_page)
         else:
-            print("Error: 'Nanhai_Chao' could not be identified as an orphan for an unknown reason.")
-
-    # Exit the script
-    exit()
-
-# Check if the dump file already exists; if not, download it with a progress bar
-if not os.path.exists(dump_file_path):
-    print("Downloading the Wikipedia dump file...")
-
-    # Get the file size for the progress bar
-    response = requests.get(dump_url, stream=True)
-    file_size = int(response.headers.get('content-length', 0))
-
-    # Initialize tqdm for the progress bar
-    with open(dump_file_path, 'wb') as dump_file:
-        with tqdm(total=file_size, unit='B', unit_scale=True, unit_divisor=1024) as pbar:
-            for data in response.iter_content(chunk_size=1024):
-                dump_file.write(data)
-                pbar.update(len(data))
-
-    print("Download complete.")
-
-# Process the dump file and collect orphaned articles
-print("Collecting orphaned articles...")
-collect_orphaned_articles(dump_file_path, output_file_path)
-print("Collection complete. Orphaned articles are saved in 'orphaned_articles_list.txt'.")
+            print("Error: '
