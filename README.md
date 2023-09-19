@@ -4,14 +4,10 @@ This Python script checks if a specific Wikipedia article is orphaned, meaning i
 
 ## Prerequisites
 
-Before running the script, ensure you have the following prerequisites installed in your Python environment:
+Before running the script, ensure you have Python installed on your system. You also need to install the required libraries by running the following commands:
 
-- tqdm: A fast, extensible progress bar library
-- mwparserfromhell: A Python parser for MediaWiki wikicode
+`pip install tqdm mwparserfromhell requests`
 
-You can install these libraries using pip:
-
-`pip install tqdm mwparserfromhell`
 
 ## Usage
 
@@ -23,24 +19,22 @@ You can install these libraries using pip:
 
 `python run.py`
 
+
 The script performs the following steps:
 
-- Tests if the article "Nanhai_Chao" (you can change the test article in the script) is orphaned.
+- Checks if the example page "Nanhai_Chao" (you can change the test article in the script) is orphaned.
 - If the test article is not orphaned, it provides reasons for failure.
-- If the test article is orphaned, it proceeds to download the Wikipedia dump file (if not already downloaded) and collects a list of 10 orphaned articles based on the specified criteria.
-- The list of orphaned articles is saved in `orphaned_articles_list.txt`.
+- If the test article is orphaned, it proceeds to download the Wikipedia dump file (if not already downloaded) and identifies orphaned articles based on the specified criteria.
+- The list of orphaned articles is saved in `orphaned_articles.txt`.
 
 ## Customization
 
 You can customize the script by changing the following parameters:
 
-- `dump_url`: The URL of the Wikipedia dump file.
-- `is_in_main_namespace(title)`: Modify this function to define your custom criteria for articles in the main namespace.
-- `is_orphaned(title, dump_file_path)`: Modify this function to check for orphaned articles based on your criteria.
-- `find_inbound_link_source(title, dump_file_path)`: Modify this function to find the source of inbound links to a specific article.
+- `example_page`: Replace this with the title of the Wikipedia article you want to test for orphan status.
+
+Please note that this script is designed to work with English Wikipedia. If you need to analyze a different language edition of Wikipedia, you may need to modify the dump URL in the script accordingly.
 
 ## License
 
-This script is provided under the GNU General Public License v3.0.
-
-Feel free to use and modify this script for your specific needs.
+This script is provided under an open-source license. Feel free to use and modify it for your specific needs.
