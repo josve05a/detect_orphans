@@ -44,10 +44,10 @@ def is_orphaned(title, dump_file_path, total_lines):
                     if title == article_title and not is_redirect and title not in redirect_titles:
                         return True
 
-            # Update the progress bar
+            # Update the progress for line counting
             if line_count % 10000 == 0:
                 progress = line_count / total_lines * 100
-                print(f"Progress: {progress:.2f}%")
+                print(f"Counting lines: {line_count}/{total_lines} ({progress:.2f}%)")
 
     return False
 
@@ -76,6 +76,7 @@ print("Starting the script...")  # Added starting message
 
 # Count the total number of lines in the dump file efficiently
 total_lines = count_total_lines_efficiently(dump_file_path)
+print(f"Total lines in the dump file: {total_lines}")
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 print("Testing if 'Nanhai_Chao' is orphaned...")
