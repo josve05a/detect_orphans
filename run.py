@@ -3,7 +3,6 @@ import mwparserfromhell
 import bz2
 import os
 from tqdm import tqdm
-import threading
 import time
 
 # Define the URL of the Wikipedia dump file
@@ -65,33 +64,6 @@ def count_total_lines_efficiently(dump_file_path):
 
     return total_lines
 
-# Define a function to continuously print line counting progress
-def print_line_count_progress(total_lines):
-    while True:
-        line_count = total_lines.value  # Access the shared variable
-        if total_lines.total == 0:
-            progress = 0.0  # Avoid division by zero
-        else:
-            progress = line_count / total_lines.total * 100
-        print(f"Counting lines: {line_count}/{total_lines.total} ({progress:.2f}%)")
-        time.sleep(10)  # Sleep for 10 seconds
-
-# Define a shared variable for line counting progress
-class TotalLines:
-    def __init__(self):
-        self.total = 0
-        self.value = 0
-
-# Create an instance of the shared variable
-total_lines = TotalLines()
-
-# Create a thread to continuously print line counting progress
-progress_thread = threading.Thread(target=print_line_count_progress, args=(total_lines,))
-progress_thread.daemon = True  # Set the thread as a daemon so it exits when the script exits
-
-# Start the progress thread
-progress_thread.start()
-
 # Define the paths for the dump file and output file
 dump_file_path = "enwiki-20230901-pages-articles.xml.bz2"
 output_file_path = "orphaned_articles_list.txt"
@@ -99,8 +71,8 @@ output_file_path = "orphaned_articles_list.txt"
 print("Starting the script...")  # Added starting message
 
 # Count the total number of lines in the dump file efficiently
-total_lines.total = count_total_lines_efficiently(dump_file_path)
-print(f"Total lines in the dump file: {total_lines.total}")
+total_lines = count_total_lines_efficiently(dump_file_path)
+print(f"Total lines in the dump file: {total_lines}")
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 print("Testing if 'Nanhai_Chao' is orphaned...")
