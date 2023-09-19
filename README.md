@@ -21,16 +21,6 @@ You can install these libraries using pip:
 
 3. Run the script using Python:
 
-`pip install tqdm mwparserfromhell`
-
-## Usage
-
-1. Clone this repository or create a new one on GitHub.
-
-2. Place the `run.py` script in your local repository folder.
-
-3. Run the script using Python:
-
 `python run.py`
 
 The script performs the following steps:
@@ -54,4 +44,3 @@ You can customize the script by changing the following parameters:
 This script is provided under the GNU General Public License v3.0.
 
 Feel free to use and modify this script for your specific needs.
-
