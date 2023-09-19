@@ -53,28 +53,6 @@ output_file_path = "orphaned_articles_list.txt"
 
 print("Starting the script...")  # Added starting message
 
-# Test if "Nanhai_Chao" is orphaned and provide reasons for failure
-test_article_title = "Nanhai_Chao"
-print(f"Testing if '{test_article_title}' is orphaned...")
-
-if is_orphaned(test_article_title, dump_file_path):
-    print(f"'{test_article_title}' is identified as an orphan.")
-else:
-    # Check if "Nanhai_Chao" is not found in the dump
-    if not os.path.exists(dump_file_path):
-        print("Error: The Wikipedia dump file does not exist.")
-    else:
-        # Find the source of inbound links to "Nanhai_Chao"
-        source_page = find_inbound_link_source(test_article_title, dump_file_path)
-
-        if source_page:
-            print(f"Error: '{test_article_title}' is linked from the article: {source_page}")
-        else:
-            print(f"Error: '{test_article_title}' could not be identified as an orphan for an unknown reason.")
-
-    # Exit the script
-    exit()
-
 # Check if the dump file already exists; if not, download it
 if not os.path.exists(dump_file_path):
     print("Downloading the Wikipedia dump file...")
@@ -86,6 +64,13 @@ if not os.path.exists(dump_file_path):
             dump_file.write(data)
 
     print("Download complete.")
+
+# Check if the dump file has been successfully opened and loaded
+if os.path.exists(dump_file_path):
+    print("Dump file opened and loaded successfully.")
+else:
+    print("Error: The Wikipedia dump file could not be opened or loaded.")
+    exit()
 
 # Process the dump file and collect orphaned articles
 print("Collecting orphaned articles...")
