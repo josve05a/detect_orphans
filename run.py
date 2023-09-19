@@ -2,8 +2,6 @@ import requests
 import mwparserfromhell
 import bz2
 import os
-import threading
-import time
 
 # Define the URL of the Wikipedia dump file
 dump_url = "https://dumps.wikimedia.org/enwiki/20230901/enwiki-20230901-pages-articles.xml.bz2"
@@ -47,28 +45,11 @@ def is_orphaned(title, dump_file_path):
 
     return False
 
-# Define a function to print line count progress periodically
-def print_line_count_progress(dump_file_path):
-    line_count = 0
-    while True:
-        try:
-            total_lines = sum(1 for line in bz2.open(dump_file_path, 'rt', encoding='utf-8'))
-            progress = line_count / total_lines * 100
-            print(f"Counting lines: {line_count}/{total_lines} ({progress:.2f}%)", end='\r')
-            time.sleep(10)  # Update progress every 10 seconds
-        except Exception as e:
-            print("Error in line counting thread:", str(e))
-            break
-
 # Define the paths for the dump file and output file
 dump_file_path = "enwiki-20230901-pages-articles.xml.bz2"
 output_file_path = "orphaned_articles_list.txt"
 
 print("Starting the script...")  # Added starting message
-
-# Start a thread to print line count progress
-line_count_thread = threading.Thread(target=print_line_count_progress, args=(dump_file_path,))
-line_count_thread.start()
 
 # Test if "Nanhai_Chao" is orphaned and provide reasons for failure
 test_article_title = "Nanhai_Chao"
@@ -94,9 +75,6 @@ else:
     # Exit the script
     exit()
 
-# Wait for the line counting thread to finish
-line_count_thread.join()
-
 # Check if the dump file already exists; if not, download it
 if not os.path.exists(dump_file_path):
     print("Downloading the Wikipedia dump file...")
@@ -113,7 +91,7 @@ if not os.path.exists(dump_file_path):
 
             # Calculate download progress
             progress_percentage = (downloaded_size / total_size) * 100
-            print(f"Download progress: {progress_percentage:.2f}%", end='\r')
+            print(f"Download progress: {progress_percentage:.2f}%")
 
     print("Download complete.")
 
@@ -125,7 +103,15 @@ orphaned_articles = []
 
 # Open the dump file for reading
 with bz2.open(dump_file_path, 'rt', encoding='utf-8') as dump_file:
+    line_count = 0  # Added line count variable
     for line in dump_file:
+        # Increment line count
+        line_count += 1
+        
+        # Print line count progress periodically
+        if line_count % 100000 == 0:  # Adjust the interval as needed
+            print(f"Processed {line_count} lines...", end='\r')
+
         # Check if the line represents an article
         if line.startswith('<page>'):
             # Parse the page content using mwparserfromhell
@@ -148,7 +134,9 @@ with bz2.open(dump_file_path, 'rt', encoding='utf-8') as dump_file:
                 # Check if the article has zero inbound links (excluding redirects)
                 if not is_redirect and article_title not in orphaned_articles:
                     orphaned_articles.append(article_title)
-                    print(f"Found orphaned article: {article_title}")
+
+# Print a final progress message
+print(f"Processed {line_count} lines...")
 
 # Save orphaned articles to a file
 with open(output_file_path, 'w', encoding='utf-8') as output_file:
